@@ -2,48 +2,49 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 
 (async () => {
-  const browser = await chromium.launch();
-  const page = await browser.newPage({ userAgent: 'Mozilla/5.0' });
-  await page.goto('https://classic-armory.org/character/eu/tbc-anniversary/spineshatter/ozaxe', { waitUntil: 'networkidle' });
-  await page.waitForTimeout(8000); // laisse le JS charger
+  let data = {};
+  try { data = JSON.parse(fs.readFileSync('data.json','utf8')); } catch(e){}
 
-  const data = await page.evaluate(() => {
-    const txt = document.body.innerText;
-    const num = (re) => Number((txt.match(re) || [])[1]?.replace(',','.')) || 0;
+  try {
+    const browser = await chromium.launch({ headless: true });
+    const page = await browser.newPage();
+    await page.goto('https://classic-armory.org/character/eu/tbc-anniversary/spineshatter/ozaxe', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.waitForTimeout(10000); // on laisse vraiment charger
 
-    // gear – prend toutes les icônes d'items
-    const gear = [...document.querySelectorAll('img')].filter(i =>
-      i.src.includes('wow.zamimg') || i.src.includes('render')
-    ).map(i => ({
-      name: i.alt || i.title || 'Item',
-      icon: i.src,
-      slot: i.closest('div')?.innerText?.slice(0,20) || ''
-    })).filter((v,i,a)=> a.findIndex(t=>t.icon===v.icon)===i).slice(0,16);
+    const txt = await page.evaluate(() => document.body.innerText);
+    const get = (re) => Number((txt.match(re)||[])[1]?.replace(',','.')) || 0;
 
-    return {
+    const gear = await page.evaluate(() =>
+      [...document.querySelectorAll('img')].filter(i=>i.src.includes('inv_')||i.src.includes('wow.zamimg'))
+       .slice(0,16).map(i=>({name:i.alt||'Item', icon:i.src}))
+    );
+
+    data = {
+     ...data,
       name: "Ozaxe",
-      level: num(/Level\s+(\d+)/i) || 20,
-      race: "Orc",
-      class: "Warrior",
-      spec: "Arms",
+      level: get(/Level\s+(\d+)/i) || data.level || 20,
+      race: "Orc", class: "Warrior", spec: "Arms",
       stats: {
-        strength: num(/Strength\D+(\d+)/i) || 68,
-        agility: num(/Agility\D+(\d+)/i) || 0,
-        stamina: num(/Stamina\D+(\d+)/i) || 0,
-        crit: num(/Melee Crit\D+([\d.,]+)/i) || num(/Crit\D+([\d.,]+)/i) || 11.11,
-        ap: num(/Attack Power\D+(\d+)/i) || 0,
-        hit: num(/Hit Rating\D+(\d+)/i) || 0
+        strength: get(/Strength\D+(\d+)/i) || data.stats?.strength || 68,
+        stamina: get(/Stamina\D+(\d+)/i) || data.stats?.stamina || 0,
+        agility: get(/Agility\D+(\d+)/i) || data.stats?.agility || 0,
+        crit: get(/Crit\D+([\d.,]+)/i) || data.stats?.crit || 11.11,
+        ap: get(/Attack Power\D+(\d+)/i) || data.stats?.ap || 0,
+        hit: get(/Hit\D+(\d+)/i) || 0
       },
       professions: {
-        mining: num(/Mining\D+(\d+)/i) || 90,
-        jewelcrafting: num(/Jewelcrafting\D+(\d+)/i) || 54
+        mining: get(/Mining\D+(\d+)/i) || data.professions?.mining || 90,
+        jewelcrafting: get(/Jewelcrafting\D+(\d+)/i) || data.professions?.jewelcrafting || 54
       },
-      gear,
+      gear: gear.length? gear : (data.gear||[]),
       updated: Math.floor(Date.now()/1000)
     };
-  });
+    await browser.close();
+    console.log('Scrape OK');
+  } catch(err) {
+    console.log('Scrape failed, keeping old data:', err.message);
+    data.updated = Math.floor(Date.now()/1000);
+  }
 
   fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
-  await browser.close();
-  console.log('V2 OK', data.level, data.stats.strength);
 })();
