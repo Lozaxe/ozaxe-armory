@@ -1,48 +1,58 @@
-<!doctype html>
-<html lang="fr">
-<head>
-<meta charset="utf-8">
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Ozaxe – Armurerie</title>
+<title>Ozaxe – Armurerie V2</title>
 <style>
-body{margin:0;background:#0b0713;color:#e8e0ff;font-family:Inter,system-ui; display:flex;justify-content:center;padding:40px}
-.card{width:100%;max-width:900px;background:linear-gradient(180deg,#1a1030,#0f0a1c);border:1px solid #3a2560;border-radius:24px;padding:28px;box-shadow:0 0 40px #7b3cff33}
-h1{margin:0;font-size:34px;color:#c9a6ff} h1 span{color:#ffb000}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px}
-.box{background:#140c24;border:1px solid #2a184a;border-radius:16px;padding:16px}
-.box h3{margin:0 0 8px;color:#9d7bff;font-size:13px;text-transform:uppercase;letter-spacing:1px}
-.stat{font-size:28px;font-weight:800;color:#fff} .stat small{font-size:14px;color:#b49fff;margin-left:6px}
-.foot{margin-top:18px;color:#8b7db3;font-size:12px;text-align:right}
-a{color:#ffb000}
-</style>
-</head>
-<body>
+:root{--bg:#07050c;--card:#140e22;--vio:#9d6bff;--gold:#ffb000}
+body{margin:0;background:radial-gradient(800px 400px at 70% -10%,#2a1950 0,#07050c 60%);color:#e9e3ff;font-family:Inter,system-ui;padding:30px;display:flex;justify-content:center}
+.wrap{width:100%;max-width:1100px}
+header{display:flex;justify-content:space-between;align-items:end;margin-bottom:18px}
+h1{margin:0;font-size:42px;color:var(--vio)}h1 b{color:var(--gold)}
+.card{background:linear-gradient(180deg,#1b1231,#0e0a18);border:1px solid #3a2a66;border-radius:20px;padding:20px;margin-bottom:16px;box-shadow:0 0 30px #7a3dff22}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat h3{margin:0 0 6px;font-size:12px;color:#a48fff;text-transform:uppercase;letter-spacing:.8px}
+.stat.v{font-size:30px;font-weight:800}
+.bar{height:8px;background:#25173f;border-radius:6px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--vio),var(--gold));width:0%}
+.gear{display:grid;grid-template-columns:repeat(8,1fr);gap:10px}
+.item{background:#0f0a1a;border:1px solid #2d1b4f;border-radius:12px;padding:8px;text-align:center}
+.item img{width:48px;height:48px;border-radius:8px;border:1px solid #000}
+.item span{display:block;font-size:11px;margin-top:4px;color:#cbb8ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.foot{color:#8a7db3;font-size:12px;text-align:right;margin-top:8px}
+@media(max-width:900px){.grid4{grid-template-columns:repeat(2,1fr)}.gear{grid-template-columns:repeat(4,1fr)}}
+</style></head><body>
+<div class="wrap">
+<header><h1>Ozaxe <b>lvl <span id="lvl">20</span></b></h1><div style="color:#b79fff">Orc Guerrier Arms – Spineshatter</div></header>
+
 <div class="card">
-  <h1>Ozaxe <span>lvl <b id="lvl">20</b></span></h1>
-  <div style="color:#b49fff">Orc Guerrier Arms – Spineshatter (TBC Anniversary)</div>
-  
-  <div class="grid">
-    <div class="box"><h3>Force</h3><div class="stat" id="str">68</div></div>
-    <div class="box"><h3>Critique</h3><div class="stat" id="crit">11.11<small>%</small></div></div>
-    <div class="box"><h3>Puissance d'attaque</h3><div class="stat" id="ap">0</div></div>
-    <div class="box"><h3>Métiers</h3><div class="stat"><span id="min">90</span><small>/150 minage</small> · <span id="jc">54</span><small>/75 joa</small></div></div>
+  <div class="grid4">
+    <div class="stat"><h3>Force</h3><div class="v" id="str">-</div></div>
+    <div class="stat"><h3>Crit</h3><div class="v"><span id="crit">-</span><small style="font-size:16px">%</small></div></div>
+    <div class="stat"><h3>PA</h3><div class="v" id="ap">-</div></div>
+    <div class="stat"><h3>Endu</h3><div class="v" id="sta">-</div></div>
   </div>
-  
-  <div class="foot">Dernière maj : <span id="upd">—</span> · <a href="https://classic-armory.org/character/eu/tbc-anniversary/spineshatter/ozaxe" target="_blank">Classic Armory</a></div>
+</div>
+
+<div class="card">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div><h3 style="margin:0 0 6px;color:#a48fff">Minage</h3><div><span id="min">90</span>/150</div><div class="bar"><i id="bmin"></i></div></div>
+    <div><h3 style="margin:0 0 6px;color:#a48fff">Joaillerie</h3><div><span id="jc">54</span>/75</div><div class="bar"><i id="bjc"></i></div></div>
+  </div>
+</div>
+
+<div class="card"><h3 style="margin:0 0 12px;color:#a48fff">Stuff équipé</h3><div class="gear" id="gear"></div></div>
+
+<div class="foot">Dernière maj : <span id="upd">—</span> · <a href="https://classic-armory.org/character/eu/tbc-anniversary/spineshatter/ozaxe" target="_blank" style="color:var(--gold)">Classic Armory</a></div>
 </div>
 
 <script>
 async function load(){
   const d = await fetch('data.json?'+Date.now()).then(r=>r.json());
-  lvl.textContent = d.level;
-  str.textContent = d.stats.strength;
-  crit.textContent = d.stats.crit;
-  ap.textContent = d.stats.ap;
-  min.textContent = d.professions.mining;
-  jc.textContent = d.professions.jewelcrafting;
-  upd.textContent = new Date(d.updated*1000).toLocaleString('fr-FR');
+  lvl.textContent=d.level; str.textContent=d.stats.strength; crit.textContent=d.stats.crit; ap.textContent=d.stats.ap; sta.textContent=d.stats.stamina||0;
+  min.textContent=d.professions.mining; jc.textContent=d.professions.jewelcrafting;
+  bmin.style.width=Math.min(100,d.professions.mining/150*100)+'%';
+  bjc.style.width=Math.min(100,d.professions.jewelcrafting/75*100)+'%';
+  upd.textContent=new Date(d.updated*1000).toLocaleString('fr-FR');
+  gear.innerHTML = (d.gear||[]).map(g=>`<div class="item"><img src="${g.icon}" alt=""><span title="${g.name}">${g.name}</span></div>`).join('') || '<div style="color:#7a6a9f">Aucun item détecté (réessaie après le prochain scrape)</div>';
 }
-load(); setInterval(load, 60000);
-</script>
-</body>
-</html>
+load(); setInterval(load,60000);
+</script></body></html>
