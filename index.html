@@ -1,0 +1,23 @@
+name: Update Ozaxe
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # toutes les 5 min
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install playwright
+      - run: npx playwright install chromium
+      - run: node scrape.js
+      - run: |
+          git config user.name "ozaxe-bot"
+          git config user.email "bot@ozaxe.fr"
+          git add data.json
+          git diff --quiet || git commit -m "update $(date -u)"
+          git push
