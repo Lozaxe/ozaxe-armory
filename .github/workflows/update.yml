@@ -4,6 +4,9 @@ on:
     - cron: '*/5 * * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
@@ -12,12 +15,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install playwright
-      - run: npx playwright install chromium
-      - run: node scrape.js
-      - run: |
+      - name: Install deps
+        run: npm i playwright
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+      - name: Scrape
+        run: node scrape.js
+      - name: Commit
+        run: |
           git config user.name "ozaxe-bot"
           git config user.email "bot@ozaxe.fr"
           git add data.json
-          git diff --quiet || git commit -m "update $(date -u)"
+          git diff --cached --quiet || git commit -m "update $(date -u +%FT%TZ)"
           git push
