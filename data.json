@@ -6,12 +6,16 @@
   "spec": "Arms",
   "stats": {
     "strength": 68,
+    "stamina": 0,
+    "agility": 0,
     "crit": 11.11,
-    "ap": 0
+    "ap": 0,
+    "hit": 0
   },
   "professions": {
     "mining": 90,
     "jewelcrafting": 54
   },
-  "updated": 1781206127
+  "updated": 1781206649,
+  "gear": []
 }
