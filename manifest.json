@@ -1,0 +1,21 @@
+{
+  "name": "Ozaxe Armory",
+  "short_name": "Ozaxe",
+  "description": "Stats live de Ozaxe - Chaman Orc Spineshatter",
+  "start_url": "/ozaxe-armory/",
+  "display": "standalone",
+  "background_color": "#07050c",
+  "theme_color": "#9d6bff",
+  "icons": [
+    {
+      "src": "https://wow.zamimg.com/images/wow/icons/large/classicon_shaman.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "https://wow.zamimg.com/images/wow/icons/large/classicon_shaman.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
