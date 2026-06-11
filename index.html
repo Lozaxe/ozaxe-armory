@@ -1,23 +1,48 @@
-name: Update Ozaxe
-on:
-  schedule:
-    - cron: '*/5 * * * *'  # toutes les 5 min
-  workflow_dispatch:
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ozaxe – Armurerie</title>
+<style>
+body{margin:0;background:#0b0713;color:#e8e0ff;font-family:Inter,system-ui; display:flex;justify-content:center;padding:40px}
+.card{width:100%;max-width:900px;background:linear-gradient(180deg,#1a1030,#0f0a1c);border:1px solid #3a2560;border-radius:24px;padding:28px;box-shadow:0 0 40px #7b3cff33}
+h1{margin:0;font-size:34px;color:#c9a6ff} h1 span{color:#ffb000}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px}
+.box{background:#140c24;border:1px solid #2a184a;border-radius:16px;padding:16px}
+.box h3{margin:0 0 8px;color:#9d7bff;font-size:13px;text-transform:uppercase;letter-spacing:1px}
+.stat{font-size:28px;font-weight:800;color:#fff} .stat small{font-size:14px;color:#b49fff;margin-left:6px}
+.foot{margin-top:18px;color:#8b7db3;font-size:12px;text-align:right}
+a{color:#ffb000}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Ozaxe <span>lvl <b id="lvl">20</b></span></h1>
+  <div style="color:#b49fff">Orc Guerrier Arms – Spineshatter (TBC Anniversary)</div>
+  
+  <div class="grid">
+    <div class="box"><h3>Force</h3><div class="stat" id="str">68</div></div>
+    <div class="box"><h3>Critique</h3><div class="stat" id="crit">11.11<small>%</small></div></div>
+    <div class="box"><h3>Puissance d'attaque</h3><div class="stat" id="ap">0</div></div>
+    <div class="box"><h3>Métiers</h3><div class="stat"><span id="min">90</span><small>/150 minage</small> · <span id="jc">54</span><small>/75 joa</small></div></div>
+  </div>
+  
+  <div class="foot">Dernière maj : <span id="upd">—</span> · <a href="https://classic-armory.org/character/eu/tbc-anniversary/spineshatter/ozaxe" target="_blank">Classic Armory</a></div>
+</div>
 
-jobs:
-  scrape:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm install playwright
-      - run: npx playwright install chromium
-      - run: node scrape.js
-      - run: |
-          git config user.name "ozaxe-bot"
-          git config user.email "bot@ozaxe.fr"
-          git add data.json
-          git diff --quiet || git commit -m "update $(date -u)"
-          git push
+<script>
+async function load(){
+  const d = await fetch('data.json?'+Date.now()).then(r=>r.json());
+  lvl.textContent = d.level;
+  str.textContent = d.stats.strength;
+  crit.textContent = d.stats.crit;
+  ap.textContent = d.stats.ap;
+  min.textContent = d.professions.mining;
+  jc.textContent = d.professions.jewelcrafting;
+  upd.textContent = new Date(d.updated*1000).toLocaleString('fr-FR');
+}
+load(); setInterval(load, 60000);
+</script>
+</body>
+</html>
