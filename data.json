@@ -2,20 +2,26 @@
   "name": "Ozaxe",
   "level": 20,
   "race": "Orc",
-  "class": "Warrior",
-  "spec": "Arms",
+  "class": "Chaman",
+  "spec": "Amélioration",
   "stats": {
     "strength": 68,
     "stamina": 0,
     "agility": 0,
     "crit": 11.11,
-    "ap": 0,
-    "hit": 0
+    "ap": 0
   },
   "professions": {
     "mining": 90,
     "jewelcrafting": 54
   },
-  "updated": 1781206649,
-  "gear": []
+  "updated": 1781206928,
+  "gear": [],
+  "history": [
+    {
+      "t": 1781206928,
+      "level": 20,
+      "str": 68
+    }
+  ]
 }
