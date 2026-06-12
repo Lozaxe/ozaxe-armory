@@ -1,32 +1,33 @@
 {
-  "name": "Ozaxe",
-  "level": 20,
-  "race": "Orc",
-  "class": "Chaman",
-  "spec": "Amélioration",
-  "stats": {
-    "strength": 68,
-    "stamina": 0,
-    "agility": 0,
-    "crit": 11.11,
-    "ap": 0
+  "updated": "2026-06-12T05:09:19.338509Z",
+  "base": {
+    "health": 779,
+    "mana": 820,
+    "stamina": 73,
+    "strength": 64,
+    "agility": 48,
+    "intellect": 47,
+    "spirit": 60
   },
-  "professions": {
-    "mining": 90,
-    "jewelcrafting": 54
+  "melee": {
+    "damage": "78 - 102",
+    "speed": "2,90",
+    "ap": 150,
+    "crit": "6,27%",
+    "haste": "0,00%"
   },
-  "updated": 1781223059,
-  "gear": [],
-  "history": [
-    {
-      "t": 1781206928,
-      "level": 20,
-      "str": 68
-    },
-    {
-      "t": 1781223059,
-      "level": 20,
-      "str": 68
-    }
-  ]
+  "spell": {
+    "healing": 0,
+    "damage": 0,
+    "penetration": 0,
+    "mp5": 40,
+    "crit": "4,64%"
+  },
+  "defense": {
+    "armor": 477,
+    "dodge": "6,39%",
+    "parry": "0,00%",
+    "block": "4,56%",
+    "defense": 94
+  }
 }
