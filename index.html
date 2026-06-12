@@ -3,86 +3,64 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Ozaxe Armory</title>
+<title>Ozaxe — Spineshatter</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#9d6bff">
+<meta name="theme-color" content="#7b4dff">
 <style>
-:root{--bg:#07050c;--card:#0f0a1a;--accent:#9d6bff;--text:#e8e0ff;--muted:#8a7fb3}
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial;padding:16px}
-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.logo{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#7b4dff,#3a1d7a);display:grid;place-items:center;font-size:24px}
-h1{font-size:20px;margin:0} .sub{color:var(--muted);font-size:12px}
-.card{background:var(--card);border:1px solid #2a1f4a;border-radius:16px;padding:14px;margin-bottom:12px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.stat{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #2a1f4a;font-size:14px}
-.stat:last-child{border:0} .stat b{color:#fff}
-h3{margin:0 0 8px;color:var(--accent);font-size:14px;letter-spacing:.5px;text-transform:uppercase}
-canvas{width:100%;height:180px}
-footer{color:var(--muted);font-size:11px;text-align:center;margin-top:20px}
+:root{--bg:#06040b;--card:#0f0a1a;--accent:#8b5cf6;--text:#e6e0ff;--muted:#8a7fb3}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui;padding:14px}
+header{display:flex;gap:12px;align-items:center;margin-bottom:14px}
+.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#7b4dff,#3a1d7a);display:grid;place-items:center;font-size:22px}
+h1{margin:0;font-size:18px}.sub{color:var(--muted);font-size:12px}
+.card{background:var(--card);border:1px solid #251a3f;border-radius:14px;padding:12px;margin-bottom:12px}
+h3{margin:0 0 8px;color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:.6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed #1f1633;font-size:13px}
+.stat:last-child{border:0}.stat b{color:#fff}
+.gear{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px}
+.item{display:flex;gap:10px;align-items:center;background:#0b0714;border:1px solid #1d1430;padding:8px;border-radius:10px}
+.item img{width:40px;height:40px;border-radius:6px;border:1px solid #2a1f4a;background:#000}
+.item.name{font-size:13px;line-height:1.2}
+.item.slot{font-size:11px;color:var(--muted);text-transform:capitalize}
+.item.ilvl{margin-left:auto;font-size:12px;color:#bda6ff}
+.q-epic.name{color:#a855f7}.q-rare.name{color:#3b82f6}.q-uncommon.name{color:#22c55e}
+footer{color:var(--muted);font-size:11px;text-align:center;margin-top:18px}
 </style>
 </head>
 <body>
 <header>
   <div class="logo">⚡</div>
-  <div>
-    <h1>Ozaxe — Spineshatter</h1>
-    <div class="sub">Chaman Orc • TBC Anniversary • Maj auto toutes les 10 min</div>
-  </div>
+  <div><h1>Ozaxe — Spineshatter</h1><div class="sub">Chaman Orc • TBC Anniversary • Maj auto toutes les 10 min</div></div>
 </header>
 
-<div class="card">
-  <h3>Progression iLvl</h3>
-  <canvas id="chart"></canvas>
-  <div class="sub" id="updated">Chargement...</div>
-</div>
+<div class="card"><h3>Équipement complet</h3><div id="gear" class="gear">Chargement...</div></div>
 
-<div class="grid">
+<div class="grid2">
   <div class="card"><h3>Base</h3><div id="base"></div></div>
   <div class="card"><h3>Melee</h3><div id="melee"></div></div>
   <div class="card"><h3>Spell</h3><div id="spell"></div></div>
   <div class="card"><h3>Defense</h3><div id="defense"></div></div>
 </div>
 
+<div class="card"><h3>Progression iLvl</h3><div class="sub" id="updated">Dernière maj:...</div></div>
 <footer>Data: classic-armory.org • PWA installable</footer>
 
 <script>
-// Service Worker
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js')}
-
-// Load data.json
 async function load(){
-  const res = await fetch('data.json?t='+Date.now());
-  const d = await res.json();
-  
+  const d = await (await fetch('data.json?t='+Date.now())).json();
   updated.textContent = 'Dernière maj: ' + new Date(d.updated).toLocaleString('fr-FR');
-  
-  const fmt = o => Object.entries(o).map(([k,v])=> 
-    `<div class="stat"><span>${k}</span><b>${v}</b></div>`).join('');
-  
-  base.innerHTML = fmt(d.base);
-  melee.innerHTML = fmt(d.melee);
-  spell.innerHTML = fmt(d.spell);
-  defense.innerHTML = fmt(d.defense);
-  
-  // Graph simple (si tu as un historique dans data.history)
-  if(d.history){
-    drawChart(d.history);
-  }
+  const fmt = o => Object.entries(o||{}).map(([k,v])=>`<div class="stat"><span>${k}</span><b>${v}</b></div>`).join('');
+  base.innerHTML=fmt(d.base); melee.innerHTML=fmt(d.melee); spell.innerHTML=fmt(d.spell); defense.innerHTML=fmt(d.defense);
+  const g = d.gear||[];
+  gear.innerHTML = g.length? g.map(it=>`
+    <div class="item q-${it.quality}">
+      <img src="${it.icon}" onerror="this.style.display='none'">
+      <div><div class="name">${it.name}</div><div class="slot">${it.slot}</div></div>
+      <div class="ilvl">${it.ilvl?'ilvl '+it.ilvl:''}</div>
+    </div>`).join('') : 'Aucun item trouvé';
 }
-load();
-setInterval(load, 600000); // refresh toutes les 10 min
-
-function drawChart(hist){
-  const c = document.getElementById('chart'), ctx=c.getContext('2d');
-  const w=c.width=c.offsetWidth*2, h=c.height=360;
-  ctx.clearRect(0,0,w,h);
-  ctx.strokeStyle='#9d6bff'; ctx.lineWidth=3; ctx.beginPath();
-  const max=Math.max(...hist.map(p=>p.ilvl)), min=Math.min(...hist.map(p=>p.ilvl));
-  hist.forEach((p,i)=>{
-    const x=i/(hist.length-1)*w, y=h-((p.ilvl-min)/(max-min||1))*h*0.8 - h*0.1;
-    i?ctx.lineTo(x,y):ctx.moveTo(x,y);
-  }); ctx.stroke();
-}
+load(); setInterval(load,600000);
 </script>
 </body>
 </html>
