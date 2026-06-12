@@ -1,70 +1,88 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Ozaxe – Armurerie V2</title>
+<title>Ozaxe Armory</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#9d6bff">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="https://wow.zamimg.com/images/wow/icons/large/classicon_shaman.jpg">
-<script>
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}
-</script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-:root{--bg:#07050c;--card:#140e22;--vio:#9d6bff;--gold:#ffb000}
-body{margin:0;background:radial-gradient(800px 400px at 70% -10%,#2a1950 0,#07050c 60%);color:#e9e3ff;font-family:Inter,system-ui;padding:30px;display:flex;justify-content:center}
-.wrap{width:100%;max-width:1100px}
-header{display:flex;justify-content:space-between;align-items:end;margin-bottom:18px}
-h1{margin:0;font-size:42px;color:var(--vio)}h1 b{color:var(--gold)}
-.card{background:linear-gradient(180deg,#1b1231,#0e0a18);border:1px solid #3a2a66;border-radius:20px;padding:20px;margin-bottom:16px}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.stat h3{margin:0 0 6px;font-size:12px;color:#a48fff;text-transform:uppercase}
-.stat.v{font-size:30px;font-weight:800}
-.bar{height:8px;background:#25173f;border-radius:6px;overflow:hidden;margin-top:8px}
-.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--vio),var(--gold));width:0%}
-.gear{display:grid;grid-template-columns:repeat(8,1fr);gap:10px}
-.item{background:#0f0a1a;border:1px solid #2d1b4f;border-radius:12px;padding:8px;text-align:center}
-.item img{width:48px;height:48px;border-radius:8px}
-.foot{color:#8a7db3;font-size:12px;text-align:right;margin-top:8px}
-</style></head><body>
-<div class="wrap">
-<header><h1>Ozaxe <b>lvl <span id="lvl">20</span></b></h1><div id="sub" style="color:#b79fff">Orc Chaman – Spineshatter</div></header>
+:root{--bg:#07050c;--card:#0f0a1a;--accent:#9d6bff;--text:#e8e0ff;--muted:#8a7fb3}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial;padding:16px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.logo{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#7b4dff,#3a1d7a);display:grid;place-items:center;font-size:24px}
+h1{font-size:20px;margin:0} .sub{color:var(--muted);font-size:12px}
+.card{background:var(--card);border:1px solid #2a1f4a;border-radius:16px;padding:14px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #2a1f4a;font-size:14px}
+.stat:last-child{border:0} .stat b{color:#fff}
+h3{margin:0 0 8px;color:var(--accent);font-size:14px;letter-spacing:.5px;text-transform:uppercase}
+canvas{width:100%;height:180px}
+footer{color:var(--muted);font-size:11px;text-align:center;margin-top:20px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">⚡</div>
+  <div>
+    <h1>Ozaxe — Spineshatter</h1>
+    <div class="sub">Chaman Orc • TBC Anniversary • Maj auto toutes les 10 min</div>
+  </div>
+</header>
 
-<div class="card"><div class="grid4">
-  <div class="stat"><h3>Force</h3><div class="v" id="str">-</div></div>
-  <div class="stat"><h3>Crit</h3><div class="v"><span id="crit">-</span>%</div></div>
-  <div class="stat"><h3>PA</h3><div class="v" id="ap">-</div></div>
-  <div class="stat"><h3>Endu</h3><div class="v" id="sta">-</div></div>
-</div></div>
-
-<div class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-  <div><h3 style="margin:0;color:#a48fff">Minage</h3><div><span id="min">90</span>/150</div><div class="bar"><i id="bmin"></i></div></div>
-  <div><h3 style="margin:0;color:#a48fff">Joaillerie</h3><div><span id="jc">54</span>/75</div><div class="bar"><i id="bjc"></i></div></div>
-</div></div>
-
-<div class="card"><h3 style="margin:0 0 12px;color:#a48fff">Progression 7 jours</h3><canvas id="hist" height="120"></canvas></div>
-
-<div class="card"><h3 style="margin:0 0 12px;color:#a48fff">Stuff</h3><div class="gear" id="gear"></div></div>
-
-<div class="foot">Dernière maj : <span id="upd">—</span></div>
+<div class="card">
+  <h3>Progression iLvl</h3>
+  <canvas id="chart"></canvas>
+  <div class="sub" id="updated">Chargement...</div>
 </div>
 
-<script>
-let chart;
-async function load(){
-  const d = await fetch('data.json?'+Date.now()).then(r=>r.json());
-  lvl.textContent=d.level; str.textContent=d.stats.strength; crit.textContent=d.stats.crit; ap.textContent=d.stats.ap; sta.textContent=d.stats.stamina||0;
-  min.textContent=d.professions.mining; jc.textContent=d.professions.jewelcrafting;
-  bmin.style.width=d.professions.mining/150*100+'%'; bjc.style.width=d.professions.jewelcrafting/75*100+'%';
-  sub.textContent=`${d.race} ${d.class} ${d.spec} – Spineshatter`;
-  upd.textContent=new Date(d.updated*1000).toLocaleString('fr-FR');
-  gear.innerHTML=(d.gear||[]).map(g=>`<div class="item"><img src="${g.icon}"><span>${g.name}</span></div>`).join('');
+<div class="grid">
+  <div class="card"><h3>Base</h3><div id="base"></div></div>
+  <div class="card"><h3>Melee</h3><div id="melee"></div></div>
+  <div class="card"><h3>Spell</h3><div id="spell"></div></div>
+  <div class="card"><h3>Defense</h3><div id="defense"></div></div>
+</div>
 
-  const labels = (d.history||[]).map(h=>new Date(h.t*1000).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}));
-  const levels = (d.history||[]).map(h=>h.level);
-  const strs = (d.history||[]).map(h=>h.str);
-  if(chart) chart.destroy();
-  chart = new Chart(hist,{type:'line',data:{labels,datasets:[{label:'Level',data:levels,yAxisID:'y'},{label:'Force',data:strs,yAxisID:'y1'}]},options:{responsive:true,scales:{y:{position:'left'},y1:{position:'right',grid:{drawOnChartArea:false}}}}});
+<footer>Data: classic-armory.org • PWA installable</footer>
+
+<script>
+// Service Worker
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js')}
+
+// Load data.json
+async function load(){
+  const res = await fetch('data.json?t='+Date.now());
+  const d = await res.json();
+  
+  updated.textContent = 'Dernière maj: ' + new Date(d.updated).toLocaleString('fr-FR');
+  
+  const fmt = o => Object.entries(o).map(([k,v])=> 
+    `<div class="stat"><span>${k}</span><b>${v}</b></div>`).join('');
+  
+  base.innerHTML = fmt(d.base);
+  melee.innerHTML = fmt(d.melee);
+  spell.innerHTML = fmt(d.spell);
+  defense.innerHTML = fmt(d.defense);
+  
+  // Graph simple (si tu as un historique dans data.history)
+  if(d.history){
+    drawChart(d.history);
+  }
 }
-load(); setInterval(load,60000);
-</script></body></html>
+load();
+setInterval(load, 600000); // refresh toutes les 10 min
+
+function drawChart(hist){
+  const c = document.getElementById('chart'), ctx=c.getContext('2d');
+  const w=c.width=c.offsetWidth*2, h=c.height=360;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle='#9d6bff'; ctx.lineWidth=3; ctx.beginPath();
+  const max=Math.max(...hist.map(p=>p.ilvl)), min=Math.min(...hist.map(p=>p.ilvl));
+  hist.forEach((p,i)=>{
+    const x=i/(hist.length-1)*w, y=h-((p.ilvl-min)/(max-min||1))*h*0.8 - h*0.1;
+    i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+  }); ctx.stroke();
+}
+</script>
+</body>
+</html>
