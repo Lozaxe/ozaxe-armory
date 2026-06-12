@@ -1,49 +1,74 @@
-import requests, re, json, datetime
+import requests, json, re
 from bs4 import BeautifulSoup
+from datetime import datetime, timezone
 
 URL = "https://classic-armory.org/character/eu/tbc-anniversary/spineshatter/ozaxe"
-html = requests.get(URL, headers={"User-Agent":"Mozilla/5.0"}).text
+headers = {"User-Agent":"Mozilla/5.0"}
 
-# Classic Armory met les stats en texte brut pour le SEO
-text = re.sub(r'\s+', ' ', BeautifulSoup(html, 'html.parser').get_text())
-
-def get(pattern, default=0):
-    m = re.search(pattern, text)
-    return m.group(1) if m else default
+html = requests.get(URL, headers=headers, timeout=20).text
+soup = BeautifulSoup(html, "lxml")
 
 data = {
-  "updated": datetime.datetime.utcnow().isoformat()+"Z",
-  "base": {
-    "health": int(get(r'Health[,\s]+(\d+)', 779)),
-    "mana": int(get(r'Mana[,\s]+(\d+)', 820)),
-    "stamina": int(get(r'Stamina[,\s]+(\d+)', 73)),
-    "strength": int(get(r'Strength[,\s]+(\d+)', 64)),
-    "agility": int(get(r'Agility[,\s]+(\d+)', 48)),
-    "intellect": int(get(r'Intellect[,\s]+(\d+)', 47)),
-    "spirit": int(get(r'Spirit[,\s]+(\d+)', 60)),
-  },
-  "melee": {
-    "damage": get(r'Damage[,\s]+([\d\s\-–]+)', "78 - 102"),
-    "speed": get(r'Speed[,\s]+([\d,\.]+)', "2,90"),
-    "ap": int(get(r'Attack Power[,\s]+(\d+)', 150)),
-    "crit": get(r'Crit Chance[,\s]+([\d,\.]+%)', "6,27%"),
-    "haste": get(r'Haste[,\s]+([\d,\.]+%)', "0,00%"),
-  },
-  "spell": {
-    "healing": int(get(r'Bonus Healing[,\s]+(\d+)', 0)),
-    "damage": int(get(r'Bonus Damage[,\s]+(\d+)', 0)),
-    "penetration": int(get(r'Penetration[,\s]+(\d+)', 0)),
-    "mp5": int(get(r'Mana Regen[,\s]+(\d+)', 40)),
-    "crit": get(r'Combat Regen.*?Crit Chance[,\s]+([\d,\.]+%)', "4,64%"),
-  },
-  "defense": {
-    "armor": int(get(r'Armor[,\s]+(\d+)', 477)),
-    "dodge": get(r'Dodge[,\s]+([\d,\.]+%)', "6,39%"),
-    "parry": get(r'Parry[,\s]+([\d,\.]+%)', "0,00%"),
-    "block": get(r'Block[,\s]+([\d,\.]+%)', "4,56%"),
-    "defense": int(get(r'Defense[,\s]+(\d+)', 94)),
-  }
+    "updated": datetime.now(timezone.utc).isoformat(),
+    "level": 20,
+    "base": {},
+    "melee": {},
+    "spell": {},
+    "defense": {},
+    "gear": []
 }
 
-with open("data.json","w") as f:
-    json.dump(data,f,indent=2)
+# --- stats (comme avant) ---
+def text_after(label):
+    el = soup.find(string=re.compile(label, re.I))
+    if not el: return ""
+    # cherche le prochain nombre
+    nxt = el.find_parent().find_next_sibling()
+    return nxt.get_text(strip=True) if nxt else ""
+
+for k in ["health","mana","stamina","strength","agility","intellect","spirit"]:
+    v = text_after(k)
+    if v: data["base"][k] = v
+
+for k in ["damage","speed","ap","crit","haste"]:
+    v = text_after(k)
+    if v: data["melee"][k] = v
+
+for k in ["healing","damage","penetration","mp5","crit"]:
+    v = text_after(k)
+    if v: data["spell"][k] = v
+
+for k in ["armor","dodge","parry","block","defense"]:
+    v = text_after(k)
+    if v: data["defense"][k] = v
+
+# --- GEAR : parse tous les items ---
+# Classic Armory met les items dans des <a class="item"> avec data-quality
+for a in soup.select("a.item, div.item-slot a,.gear-slot a"):
+    name = a.get("data-name") or a.get("title") or a.text.strip()
+    icon = ""
+    img = a.find("img")
+    if img and img.get("src"):
+        icon = img["src"]
+        if icon.startswith("//"): icon = "https:" + icon
+    slot = a.get("data-slot") or a.parent.get("data-slot","")
+    ilvl = a.get("data-ilvl","")
+    quality = "epic" if "epic" in str(a.get("class")) else "rare" if "rare" in str(a.get("class")) else "uncommon"
+
+    if name and len(name) > 2:
+        data["gear"].append({
+            "slot": slot.lower(),
+            "name": name,
+            "ilvl": ilvl,
+            "icon": icon,
+            "quality": quality
+        })
+
+# tri dans l'ordre WoW
+order = ["head","neck","shoulder","back","chest","shirt","tabard","wrist","hands","waist","legs","feet","finger1","finger2","trinket1","trinket2","mainhand","offhand","ranged"]
+data["gear"] = sorted(data["gear"], key=lambda x: order.index(x["slot"]) if x["slot"] in order else 99)
+
+with open("data.json","w",encoding="utf-8") as f:
+    json.dump(data, f, ensure_ascii=False, indent=2)
+
+print(f"OK - {len(data['gear'])} items scraped")
