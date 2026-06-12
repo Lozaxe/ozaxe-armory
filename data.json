@@ -15,11 +15,16 @@
     "mining": 90,
     "jewelcrafting": 54
   },
-  "updated": 1781206928,
+  "updated": 1781223059,
   "gear": [],
   "history": [
     {
       "t": 1781206928,
+      "level": 20,
+      "str": 68
+    },
+    {
+      "t": 1781223059,
       "level": 20,
       "str": 68
     }
