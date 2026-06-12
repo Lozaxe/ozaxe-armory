@@ -1,7 +1,7 @@
 name: Update Ozaxe
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/10 * * * *' # toutes les 10 minutes
   workflow_dispatch:
 
 permissions:
