@@ -5,27 +5,26 @@ on:
     - cron: '*/10 * * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write   # <-- AJOUTE CES 2 LIGNES
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Setup Python
-        uses: actions/setup-python@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          
-      - name: Install deps
-        run: pip install requests beautifulsoup4
-          
-      - name: Run scraper
-        run: python scrape_stats.py
-          
-      - name: Commit data
-        run: |
+      - run: pip install requests beautifulsoup4 lxml
+      - run: python scrape_stats.py
+      - run: |
           git config user.name "ozaxe-bot"
           git config user.email "bot@ozaxe.local"
           git add data.json
-          git diff --cached --quiet || git commit -m "update stats $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          git push
+          if ! git diff --cached --quiet; then
+            git commit -m "update stats $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git push
+          fi
