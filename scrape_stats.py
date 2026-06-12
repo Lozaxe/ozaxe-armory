@@ -1,74 +1,68 @@
 import requests, json, re
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone
+import os
 
 URL = "https://classic-armory.org/character/eu/tbc-anniversary/spineshatter/ozaxe"
 headers = {"User-Agent":"Mozilla/5.0"}
 
+# garde l'ancien data.json si le scrape plante
+old = {}
+if os.path.exists("data.json"):
+    try: old = json.load(open("data.json", encoding="utf-8"))
+    except: pass
+
 html = requests.get(URL, headers=headers, timeout=20).text
 soup = BeautifulSoup(html, "lxml")
+text = soup.get_text(" ", strip=True)
+
+def find(pattern):
+    m = re.search(pattern, text, re.I)
+    return m.group(1) if m else ""
 
 data = {
     "updated": datetime.now(timezone.utc).isoformat(),
     "level": 20,
-    "base": {},
-    "melee": {},
-    "spell": {},
-    "defense": {},
-    "gear": []
+    "base": {
+        "health": find(r"Health[, ]+(\d+)"),
+        "mana": find(r"Mana[, ]+(\d+)"),
+        "stamina": find(r"Stamina[, ]+(\d+)"),
+        "strength": find(r"Strength[, ]+(\d+)"),
+        "agility": find(r"Agility[, ]+(\d+)"),
+        "intellect": find(r"Intellect[, ]+(\d+)"),
+        "spirit": find(r"Spirit[, ]+(\d+)")
+    },
+    "melee": {
+        "damage": find(r"Damage[, ]+([\d\- ]+)"),
+        "speed": find(r"Speed[, ]+([\d\.]+)"),
+        "ap": find(r"Attack Power[, ]+(\d+)"),
+        "crit": find(r"Crit Chance[, ]+([\d\.]+%?)"),
+        "haste": find(r"Haste[, ]+([\d\.]+%?)")
+    },
+    "spell": {
+        "healing": find(r"Healing[, ]+(\d+)"),
+        "damage": find(r"Spell Damage[, ]+(\d+)"),
+        "penetration": find(r"Penetration[, ]+(\d+)"),
+        "mp5": find(r"Mana per 5[, ]+(\d+)"),
+        "crit": find(r"Spell Crit[, ]+([\d\.]+%?)")
+    },
+    "defense": {
+        "armor": find(r"Armor[, ]+(\d+)"),
+        "dodge": find(r"Dodge[, ]+([\d\.]+%?)"),
+        "parry": find(r"Parry[, ]+([\d\.]+%?)"),
+        "block": find(r"Block[, ]+([\d\.]+%?)"),
+        "defense": find(r"Defense[, ]+(\d+)")
+    },
+    "gear": old.get("gear", []) # on ne touche pas au gear pour l'instant
 }
 
-# --- stats (comme avant) ---
-def text_after(label):
-    el = soup.find(string=re.compile(label, re.I))
-    if not el: return ""
-    # cherche le prochain nombre
-    nxt = el.find_parent().find_next_sibling()
-    return nxt.get_text(strip=True) if nxt else ""
-
-for k in ["health","mana","stamina","strength","agility","intellect","spirit"]:
-    v = text_after(k)
-    if v: data["base"][k] = v
-
-for k in ["damage","speed","ap","crit","haste"]:
-    v = text_after(k)
-    if v: data["melee"][k] = v
-
-for k in ["healing","damage","penetration","mp5","crit"]:
-    v = text_after(k)
-    if v: data["spell"][k] = v
-
-for k in ["armor","dodge","parry","block","defense"]:
-    v = text_after(k)
-    if v: data["defense"][k] = v
-
-# --- GEAR : parse tous les items ---
-# Classic Armory met les items dans des <a class="item"> avec data-quality
-for a in soup.select("a.item, div.item-slot a,.gear-slot a"):
-    name = a.get("data-name") or a.get("title") or a.text.strip()
-    icon = ""
-    img = a.find("img")
-    if img and img.get("src"):
-        icon = img["src"]
-        if icon.startswith("//"): icon = "https:" + icon
-    slot = a.get("data-slot") or a.parent.get("data-slot","")
-    ilvl = a.get("data-ilvl","")
-    quality = "epic" if "epic" in str(a.get("class")) else "rare" if "rare" in str(a.get("class")) else "uncommon"
-
-    if name and len(name) > 2:
-        data["gear"].append({
-            "slot": slot.lower(),
-            "name": name,
-            "ilvl": ilvl,
-            "icon": icon,
-            "quality": quality
-        })
-
-# tri dans l'ordre WoW
-order = ["head","neck","shoulder","back","chest","shirt","tabard","wrist","hands","waist","legs","feet","finger1","finger2","trinket1","trinket2","mainhand","offhand","ranged"]
-data["gear"] = sorted(data["gear"], key=lambda x: order.index(x["slot"]) if x["slot"] in order else 99)
+# si une valeur est vide, reprends l'ancienne (évite la régression)
+for sec in ["base","melee","spell","defense"]:
+    for k,v in data[sec].items():
+        if not v and old.get(sec,{}).get(k):
+            data[sec][k] = old[sec][k]
 
 with open("data.json","w",encoding="utf-8") as f:
     json.dump(data, f, ensure_ascii=False, indent=2)
 
-print(f"OK - {len(data['gear'])} items scraped")
+print("OK - stats restaurées")
