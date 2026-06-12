@@ -1,20 +1,32 @@
 <!DOCTYPE html>
-<html lang="fr"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ozaxe — Spineshatter</title>
 <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7b4dff">
 <style>
 body{margin:0;background:#06040b;color:#e6e0ff;font-family:Inter,system-ui;padding:14px}
 header{display:flex;gap:12px;align-items:center;margin-bottom:14px}
 .logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#7b4dff,#3a1d7a);display:grid;place-items:center;font-size:22px}
 h1{margin:0;font-size:18px}.sub{color:#8a7fb3;font-size:12px}
 .card{background:#0f0a1a;border:1px solid #251a3f;border-radius:14px;padding:12px;margin-bottom:12px}
-h3{margin:0 0 8px;color:#8b5cf6;font-size:12px;text-transform:uppercase}
+h3{margin:0 0 8px;color:#8b5cf6;font-size:12px;text-transform:uppercase;letter-spacing:.6px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .stat{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed #1f1633;font-size:13px}
-.stat b{color:#fff}
-</style></head><body>
-<header><div class="logo">⚡</div><div><h1>Ozaxe — Spineshatter</h1><div class="sub">Chaman Orc • TBC Anniversary • Maj auto toutes les 10 min</div></div></header>
+.stat:last-child{border:0}.stat b{color:#fff}
+footer{color:#8a7fb3;font-size:11px;text-align:center;margin-top:18px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">⚡</div>
+  <div>
+    <h1>Ozaxe — Spineshatter</h1>
+    <div class="sub">Chaman Orc • TBC Anniversary • Maj auto toutes les 10 min</div>
+  </div>
+</header>
 
 <div class="grid2">
   <div class="card"><h3>Base</h3><div id="base"></div></div>
@@ -23,16 +35,29 @@ h3{margin:0 0 8px;color:#8b5cf6;font-size:12px;text-transform:uppercase}
   <div class="card"><h3>Defense</h3><div id="defense"></div></div>
 </div>
 
-<div class="card"><h3>Progression</h3><div class="sub" id="updated"></div></div>
+<div class="card">
+  <h3>Progression</h3>
+  <div class="sub" id="updated">Dernière maj: ...</div>
+</div>
+
+<footer>Data: classic-armory.org • PWA installable</footer>
 
 <script>
-async function load(){
-  const d = await (await fetch('data.json?t='+Date.now())).json();
-  document.getElementById('updated').textContent = 'Dernière maj: ' + new Date(d.updated).toLocaleString('fr-FR');
-  const fmt = o => Object.entries(o||{}).map(([k,v])=>`<div class="stat"><span>${k}</span><b>${v}</b></div>`).join('');
-  base.innerHTML = fmt(d.base); melee.innerHTML = fmt(d.melee);
-  spell.innerHTML = fmt(d.spell); defense.innerHTML = fmt(d.defense);
-}
-load(); setInterval(load,600000);
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js')}
-</script></body></html>
+
+async function load(){
+  const res = await fetch('data.json?t='+Date.now());
+  const d = await res.json();
+  document.getElementById('updated').textContent = 'Dernière maj: ' + new Date(d.updated).toLocaleString('fr-FR');
+  
+  const fmt = o => Object.entries(o||{}).map(([k,v])=>`<div class="stat"><span>${k}</span><b>${v}</b></div>`).join('');
+  document.getElementById('base').innerHTML = fmt(d.base);
+  document.getElementById('melee').innerHTML = fmt(d.melee);
+  document.getElementById('spell').innerHTML = fmt(d.spell);
+  document.getElementById('defense').innerHTML = fmt(d.defense);
+}
+load();
+setInterval(load, 600000);
+</script>
+</body>
+</html>
