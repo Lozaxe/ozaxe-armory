@@ -1,9 +1,35 @@
 {
-  "updated": "2026-06-12T05:16:02.836656+00:00",
+  "updated": "2026-06-12T05:20:38.331236+00:00",
   "level": 20,
-  "base": {},
-  "melee": {},
-  "spell": {},
-  "defense": {},
+  "base": {
+    "health": "",
+    "mana": "",
+    "stamina": "",
+    "strength": "",
+    "agility": "",
+    "intellect": "",
+    "spirit": ""
+  },
+  "melee": {
+    "damage": "",
+    "speed": "",
+    "ap": "",
+    "crit": "",
+    "haste": ""
+  },
+  "spell": {
+    "healing": "",
+    "damage": "",
+    "penetration": "",
+    "mp5": "",
+    "crit": ""
+  },
+  "defense": {
+    "armor": "",
+    "dodge": "",
+    "parry": "",
+    "block": "",
+    "defense": ""
+  },
   "gear": []
 }
