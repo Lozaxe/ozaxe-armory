@@ -1,33 +1,9 @@
 {
-  "updated": "2026-06-12T05:09:19.338509Z",
-  "base": {
-    "health": 779,
-    "mana": 820,
-    "stamina": 73,
-    "strength": 64,
-    "agility": 48,
-    "intellect": 47,
-    "spirit": 60
-  },
-  "melee": {
-    "damage": "78 - 102",
-    "speed": "2,90",
-    "ap": 150,
-    "crit": "6,27%",
-    "haste": "0,00%"
-  },
-  "spell": {
-    "healing": 0,
-    "damage": 0,
-    "penetration": 0,
-    "mp5": 40,
-    "crit": "4,64%"
-  },
-  "defense": {
-    "armor": 477,
-    "dodge": "6,39%",
-    "parry": "0,00%",
-    "block": "4,56%",
-    "defense": 94
-  }
+  "updated": "2026-06-12T05:16:02.836656+00:00",
+  "level": 20,
+  "base": {},
+  "melee": {},
+  "spell": {},
+  "defense": {},
+  "gear": []
 }
