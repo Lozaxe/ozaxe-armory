@@ -1,8 +1,8 @@
 {
-  "updated": "2026-06-22T22:27:48.770449+00:00",
+  "updated": "2026-06-23T10:48:41.619311+00:00",
   "base": {
     "health": "",
-    "mana": "2",
+    "mana": "8",
     "stamina": "",
     "strength": "",
     "agility": "",
@@ -24,7 +24,7 @@
     "crit": ""
   },
   "defense": {
-    "armor": "2",
+    "armor": "8",
     "dodge": "",
     "parry": "",
     "block": "",
